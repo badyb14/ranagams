@@ -18,7 +18,7 @@ namespace AngramApi
       var exclusionList = config["WordListConfig:FileProvider:BadWords"];
       var sources =WordListFileSourceFactory.GetWordListFromPath(folder, fileName, extra, exclusionList);
 
-      var an = new AnagramResolverService(sources, (w) => new StringPermutation(w));
+      var an = new AnagramResolverService(sources, (w) => new WordGenerator(w));
 
 
 

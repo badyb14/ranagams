@@ -1,6 +1,7 @@
 ﻿using AnCore;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 
 namespace AnConsole
@@ -9,21 +10,19 @@ namespace AnConsole
   {
     static void Main(string[] args)
     {
-      var filePath = @"C:\Users\adi\Source\Repos\Anagram\AnConsoleApp\AnConsole\Dictionaries\words_en.txt";
-      var dic = new WordListFileSource(filePath, "en", null, null);
-      dic.Load();
+      var filePath = Directory.GetCurrentDirectory();
+      var source1 = WordListFileSourceFactory.GetWordListFromPath("Dictionaries", "words*", null, null)[0];
+      source1.Load();
+      var source2 = WordListFileSourceFactory.GetWordListFromPathV2("Dictionaries", "words*", null, null)[0];
+      source2.Load();
 
-      var generator = new StringPermutation("permuta");
-
-      var tr = dic.WordList1["d"];
-      var ju = dic.WordList2;
-      //perm.Compute();
+      var generator = new WordGenerator("elvis");
+     
       Stopwatch sw = new Stopwatch();
       sw.Start();
       int t = 0;
       foreach (var w in generator.GetPermutations())
       {
-        //if(w !=) TODO  check for the origial
         var s = new string(w);
         t++;
         //Debug.WriteLine(t);
@@ -31,19 +30,34 @@ namespace AnConsole
         //Console.Write(t);
         //Console.WriteLine(s);
         
-        
-        //if (dic.WordList2.Contains(s))
-        //{
-        //  Debug.WriteLine($"Found {s}");
-        //}
-
-        if (dic.WordList1[s] != null)
+        if (source1.Contains(s))
         {
-          Debug.WriteLine($"Found {s}");
+          Debug.WriteLine($"Found in source1: {s}");
         }
       }
 
       Debug.WriteLine($"Time {sw.Elapsed}");
+
+      generator = new WordGenerator("elvis");
+      sw.Restart();
+      foreach (var w in generator.GetPermutations())
+      {
+        var s = new string(w);
+        t++;
+        //Debug.WriteLine(t);
+        //Console.Clear();
+        //Console.Write(t);
+        //Console.WriteLine(s);
+
+
+        if (source2.Contains(s))
+        {
+          Debug.WriteLine($"Found in source2: {s}");
+        }
+      }
+
+      Debug.WriteLine($"Time {sw.Elapsed}");
+
       Console.ReadKey();
     }
   }

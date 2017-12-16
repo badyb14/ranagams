@@ -11,14 +11,14 @@ namespace AnCore
   public sealed class AnagramResolverService : IAnagramResolverService
   {
     #region Fields
-    private WordListFileSource _englishWordList;
+    private HashtableWordListSource _englishWordList;
 
-    private readonly Func<string,IStringPermutation> _permutationFactory;
+    private readonly Func<string,IWordGenerator> _permutationFactory;
     //this is thread safe for reading
     private readonly Hashtable _wordListByLanguage = new Hashtable(StringComparer.OrdinalIgnoreCase);
     #endregion
 
-    public AnagramResolverService(IWordList[] sources, Func<string,IStringPermutation> permutationFactory)
+    public AnagramResolverService(IWordList[] sources, Func<string,IWordGenerator> permutationFactory)
     {
 
       _permutationFactory = permutationFactory;
@@ -59,7 +59,7 @@ namespace AnCore
       {
         //if(w !=) TODO  check for the origial
         var s = new string(w);
-        if (wordList.WordList.Contains(s))
+        if (wordList.Contains(s))
         {
           result.Add(s);
           Debug.WriteLine($"Found {s}");

@@ -1,13 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace AnCore
 {
   public static class WordListFileSourceFactory
   {
-    public static IWordList[] GetWordListFromPath(string folder, string fileName, string extra, string exclusionList)
+    public static IWordList[] GetWordListFromPath(string folder, string fileName, string extraPath, string exclusionPath)
+    {
+      return GetWordListFromPathInternal(folder, fileName, extraPath, exclusionPath, true);
+    }
+
+    public static IWordList[] GetWordListFromPathV2(string folder, string fileName, string extraPath, string exclusionPath)
+    {
+      return GetWordListFromPathInternal(folder, fileName, extraPath, exclusionPath, false);
+    }
+
+    private static IWordList[] GetWordListFromPathInternal(string folder, string fileName, string extraPath, string exclusionPath, bool isHashSet)
     {
       //TODO trace...
       var current = Directory.GetCurrentDirectory();
@@ -15,15 +24,33 @@ namespace AnCore
 
       var baseNames = Directory.GetFiles(path, fileName);
       var list = new List<IWordList>(1);
-      foreach (var item in baseNames)
+      foreach (var filePath in baseNames)
       {
-        var parts = item.Split(new char[] { '_','.' });
+        var parts = filePath.Split(new char[] { '_', '.' });
         if (parts != null && parts.Length > 2)
         {
           var lang = parts[1];
-          var extraL = $"{extra}_{lang}.txt";
-          var exclusionListL = $"{exclusionList}_{lang}.txt";
-          list.Add(new WordListFileSource(item, lang, extraL, exclusionListL));
+          var extraPathLong = Path.Combine(path, $"{extraPath}_{lang}.txt");
+          var exclusionPathLong = Path.Combine(path, $"{exclusionPath}_{lang}.txt");
+
+          if (string.IsNullOrEmpty(extraPath))
+          {
+            extraPathLong = null;
+          }
+
+          if (string.IsNullOrEmpty(exclusionPath))
+          {
+            exclusionPathLong = null;
+          }
+
+          if (isHashSet)
+          {
+            list.Add(new HashSetWordListSource(filePath, lang, extraPathLong, exclusionPathLong, (fpath) => { return File.ReadAllLines(fpath); }));
+          }
+          else
+          {
+            list.Add(new HashtableWordListSource(filePath, lang, extraPathLong, exclusionPathLong, (fpath) => { return File.ReadAllLines(fpath); }));
+          }
         }
       }
 

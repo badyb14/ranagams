@@ -26,5 +26,34 @@ namespace AnCoreUnitTests
       }
       return n * Factorial(n - 1);
     }
+
+    public static void GeneratePermutation(int[] config, Random rand)
+    {
+      if (config == null)
+      {
+        throw new ArgumentNullException(nameof(config));
+      }
+
+      if (rand == null)
+      {
+        throw new ArgumentNullException(nameof(rand));
+      }
+
+      if (config.Length == 1)
+      {
+        return; //trivial
+      }
+
+      // swap n random positions
+      for (int i = 0; i < config.Length; i++)
+      {
+        var j = rand.Next() % config.Length; // this is good enough but is its distribution may be skewed. 
+        var temp = config[i];
+        config[i] = config[j];
+        config[j] = temp;
+      }
+    }
   }
+
+  
 }
