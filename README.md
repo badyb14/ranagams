@@ -1,2 +1,2 @@
 # ranagams
-Find anagram of a single word
+Find all anagrams of a single word.
