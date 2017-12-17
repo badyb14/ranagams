@@ -6,13 +6,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AngramApi.Models
 {
-  public class AngramContext : DbContext
+  public class AnagramContext : DbContext
   {
-    public AngramContext(DbContextOptions<AngramContext> options) : base(options)
+    public AnagramContext(DbContextOptions<AnagramContext> options) : base(options)
     {
 
     }
 
-    public DbSet<AngramItem> AngramItems { get; set; }
+    public DbSet<AnagramItem> AngramItems { get; set; }
   }
 }

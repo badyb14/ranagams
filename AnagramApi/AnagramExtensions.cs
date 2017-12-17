@@ -2,9 +2,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace AngramApi
 {
@@ -16,13 +13,23 @@ namespace AngramApi
       var fileName = config["WordListConfig:FileProvider:BaseListName"];
       var extra = config["WordListConfig:FileProvider:SupplementalName"];
       var exclusionList = config["WordListConfig:FileProvider:BadWords"];
+
+      if (string.IsNullOrWhiteSpace(folder))
+      {
+        throw new ArgumentException("invalid folder configuration");
+      }
+
+      if (string.IsNullOrWhiteSpace(fileName))
+      {
+        throw new ArgumentException("invalid file name configuration");
+      }
+
       var sources =WordListFileSourceFactory.GetWordListFromPath(folder, fileName, extra, exclusionList);
-
-      var an = new AnagramResolverService(sources, (w) => new WordGenerator(w));
-
+      var resolverService = new AnagramResolverService(sources, (w) => new WordGenerator(w));
 
 
-      collection.AddSingleton<IAnagramResolverService, AnagramResolverService>((s) => { return an; });
+
+      collection.AddSingleton<IAnagramResolverService, AnagramResolverService>((s) => { return resolverService; });
       return null;
     }
 

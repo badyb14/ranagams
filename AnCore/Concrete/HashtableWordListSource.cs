@@ -6,6 +6,16 @@ using System.Linq;
 
 namespace AnCore
 {
+  /// <summary>
+  /// Word list that uses Hashtable as internal storage.
+  /// Must be thread safe: should allow multiple threads to call load and access its property concurrently.
+  /// 
+  /// The word list is compiled by using the base path, additional path and excluded word.
+  /// For now excluded words are potentially duplicated (once in base list once in excluded list), 
+  /// this is done for a fast load.
+  /// 
+  /// TODO: Use the language to decide the string comparer and if the lower case conversion is needed.
+  /// </summary>
   public sealed class HashtableWordListSource : IWordList
   {
     #region Fields
@@ -107,31 +117,6 @@ namespace AnCore
     #endregion
 
     #region Private methods
-    private void LoadInternal1()
-    {
-      if (!IsLoaded)
-      {
-        lock (_loadGate)
-        {
-          if (!IsLoaded)
-          {
-            foreach (var item in File.ReadLines(_wordListFilePath))
-            {
-              try
-              {
-                var w = item.ToLowerInvariant();
-                _wordList.Add(w,w);
-              }
-              catch (Exception)
-              {
-              }
-            }
-            IsLoaded = true;
-          }
-        }
-      }
-    }
-
     private void EnsureLoadInternal()
     {
       if (!IsLoaded)

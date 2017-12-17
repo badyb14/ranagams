@@ -4,26 +4,26 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using AngramApi.Models;
 using AnCore;
+using AngramApi.Models;
 
-namespace AngramApi.Controllers
+namespace anagramApi.Controllers
 {
   [Produces("application/json")]
-  [Route("api/Angram")]
-  public class AngramController : Controller
+  [Route("api/anagram")]
+  public class AnagramController : Controller
   {
 
-    private readonly AngramContext _context;
+    private readonly AnagramContext _context;
     private readonly IAnagramResolverService _resolver;
 
-    public AngramController(AngramContext context, IAnagramResolverService resolver)
+    public AnagramController(AnagramContext context, IAnagramResolverService resolver)
     {
       _resolver = resolver;
       _context = context;
     }
 
-    // GET: api/Angram
+    // GET: api/anagram
     [HttpGet]
     public IEnumerable<string> Get()
     {
@@ -31,16 +31,16 @@ namespace AngramApi.Controllers
     }
 
 
-    // GET: api/Angram/5
+    // GET: api/anagram/mouse?language=en
     [HttpGet("{word}", Name ="Get")]
     public IEnumerable<string> GetAnagrams(string word,[FromQuery]string language)
     {
       //TO to validate parameters.
       //TODO execute this method as task
-      //var ar =_context.AngramItems.FirstOrDefault(a => string.Compare(a.Word, word, StringComparison.OrdinalIgnoreCase) == 0);
+      //var ar =_context.anagramItems.FirstOrDefault(a => string.Compare(a.Word, word, StringComparison.OrdinalIgnoreCase) == 0);
       //if (ar == null)
       //{
-      //  _context.Add(new AngramItem() { Word = word, Language = "en", Requested = 1 });
+      //  _context.Add(new anagramItem() { Word = word, Language = "en", Requested = 1 });
       //}
       //else
       //{
@@ -56,13 +56,13 @@ namespace AngramApi.Controllers
     
     
 
-    // POST: api/Angram
+    // POST: api/anagram
     [HttpPost]
     public void Post([FromBody]string value)
     {
     }
 
-    // PUT: api/Angram/5
+    // PUT: api/anagram/5
     [HttpPut("{id}")]
     public void Put(int id, [FromBody]string value)
     {

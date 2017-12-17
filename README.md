@@ -33,4 +33,5 @@ Given a single word generate all relevant permutations words and then verify the
 * C#
 * .Net Core
 * Cloud friendly
+* English word list from [https://github.com/dwyl/english-words](https://github.com/dwyl/english-words)
   

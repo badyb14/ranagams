@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace AngramApi.Models
 {
-  public class AngramItem
+  public class AnagramItem
   {
     public long Id { get; set; }
 
