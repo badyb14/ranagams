@@ -28,7 +28,6 @@ namespace AngramApi
       var resolverService = new AnagramResolverService(sources, (w) => new WordGenerator(w));
 
 
-
       collection.AddSingleton<IAnagramResolverService, AnagramResolverService>((s) => { return resolverService; });
       return null;
     }
