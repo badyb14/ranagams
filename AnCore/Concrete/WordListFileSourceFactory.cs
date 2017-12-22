@@ -4,43 +4,102 @@ using System.IO;
 
 namespace AnCore
 {
-  public static class WordListFileSourceFactory
+  /// <summary>
+  /// Factory of word list instances.
+  /// Contains the parsing naming convention.
+  /// </summary>
+  public sealed class WordListFileSourceFactory
   {
-    public static IWordList[] GetWordListFromPath(string folder, string fileName, string extraPath, string exclusionPath)
+    #region Fields
+    private readonly string _path;
+    private readonly string[] _baseNames;
+    private readonly string _extraPrefix;
+    private readonly string _exclusionPrefix;
+    #endregion
+
+    #region Properties
+
+    #endregion
+
+    #region Constructors
+    /// <summary>
+    /// Create a word list factory with a specific configuration.
+    /// </summary>
+    /// <param name="baseNames">full path for all base word files.</param>
+    /// <param name="path">folder where extra and exclusion word files are located.</param>
+    /// <param name="extraPrefix">the file name prefix for extra word list </param>
+    /// <param name="exclusionPrefix">the file name prefix for the exclusion word list</param>
+    public WordListFileSourceFactory(string[] baseNames, string path,  string extraPrefix, string exclusionPrefix)
     {
-      return GetWordListFromPathInternal(folder, fileName, extraPath, exclusionPath, true);
+      _baseNames = baseNames ?? throw new ArgumentNullException(nameof(baseNames));
+      foreach (var p in baseNames)
+      {
+        if (string.IsNullOrEmpty(p))
+        {
+          throw new ArgumentException("found invalid base path");
+        }
+      }
+      _path = path;
+      _extraPrefix = extraPrefix;
+      _exclusionPrefix = exclusionPrefix;
+    }
+    #endregion
+
+    #region Public Methods
+
+    public IWordList[] GetWordList(bool isHashSet)
+    {
+      var list = ProcessFileList(_path, _baseNames, _extraPrefix, _exclusionPrefix, isHashSet);
+      return list.ToArray();
     }
 
-    public static IWordList[] GetWordListFromPathV2(string folder, string fileName, string extraPath, string exclusionPath)
+    public static string BuildWordListFullPath(string path, string name, string lang)
     {
-      return GetWordListFromPathInternal(folder, fileName, extraPath, exclusionPath, false);
+    
+      var longPath = Path.Combine(path, $"{name}_{lang}.txt");
+      return longPath;
     }
 
-    private static IWordList[] GetWordListFromPathInternal(string folder, string fileName, string extraPath, string exclusionPath, bool isHashSet)
+    public static bool TryGetWordListLanguage(string filePath, out string language)
     {
-      //TODO trace...
-      var current = Directory.GetCurrentDirectory();
-      var path = Path.Combine(current, folder);
+      language = null;
+      if (string.IsNullOrEmpty(filePath))
+      {
+        return false;
+      }
+      var fName = Path.GetFileName(filePath);
 
-      var baseNames = Directory.GetFiles(path, fileName);
+      var parts = fName.Split(new char[] { '_', '.' });
+      if (parts != null && parts.Length ==3 && !string.IsNullOrWhiteSpace(parts[1]))
+      {
+        language = parts[1];
+        return true;
+      }
+      return false;
+    }
+    #endregion
+
+    #region Private methods
+
+    private static List<IWordList> ProcessFileList(string path, string[] baseNames,string extraPath, string exclusionPath, bool isHashSet)
+    {
       var list = new List<IWordList>(1);
       foreach (var filePath in baseNames)
       {
-        var parts = filePath.Split(new char[] { '_', '.' });
-        if (parts != null && parts.Length > 2)
-        {
-          var lang = parts[1];
-          var extraPathLong = Path.Combine(path, $"{extraPath}_{lang}.txt");
-          var exclusionPathLong = Path.Combine(path, $"{exclusionPath}_{lang}.txt");
+        string lang;
+        string extraPathLong = null;
+        string exclusionPathLong = null;
 
-          if (string.IsNullOrEmpty(extraPath))
+        if (TryGetWordListLanguage(filePath, out lang))
+        {
+          if (!string.IsNullOrEmpty(extraPath))
           {
-            extraPathLong = null;
+            extraPathLong = BuildWordListFullPath(path, extraPath, lang); ;
           }
 
-          if (string.IsNullOrEmpty(exclusionPath))
+          if (!string.IsNullOrEmpty(exclusionPath))
           {
-            exclusionPathLong = null;
+            exclusionPathLong = BuildWordListFullPath(path, exclusionPath, lang); ;
           }
 
           if (isHashSet)
@@ -52,9 +111,15 @@ namespace AnCore
             list.Add(new HashtableWordListSource(filePath, lang, extraPathLong, exclusionPathLong, (fpath) => { return File.ReadAllLines(fpath); }));
           }
         }
+        else
+        {
+          continue;
+        }
       }
 
-      return list.ToArray();
+      return list;
     }
+    #endregion
+
   }
 }

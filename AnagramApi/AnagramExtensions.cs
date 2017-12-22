@@ -1,13 +1,17 @@
 ﻿using AnCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
+using System.IO;
 
-namespace AngramApi
+namespace AnagramApi
 {
   public static class AnagramExtensions
   {
-    public static IAnagramResolverService AddFileBasedAnagramService(this IServiceCollection collection, IConfiguration config)
+    internal static ILoggerFactory LoggerFactory;
+
+    public static IServiceCollection AddFileBasedAnagramService(this IServiceCollection collection, IConfiguration config)
     {
       var folder = config["WordListConfig:FileProvider:Folder"];
       var fileName = config["WordListConfig:FileProvider:BaseListName"];
@@ -24,12 +28,21 @@ namespace AngramApi
         throw new ArgumentException("invalid file name configuration");
       }
 
-      var sources =WordListFileSourceFactory.GetWordListFromPath(folder, fileName, extra, exclusionList);
-      var resolverService = new AnagramResolverService(sources, (w) => new WordGenerator(w));
+      AnagramResolverService resolverService = null;
+      //could take ILoggerFactory wrap it and make it a parameter for consumption.
+      var logger = LoggerFactory.CreateLogger("AnagramApi.AnagramResolverService");
+      var current = Directory.GetCurrentDirectory();
+      var path = Path.Combine(current, folder);
+      var baseNames = Directory.GetFiles(path, fileName);
 
+      logger.LogWarning("Configuration path {0}. File pattern {1}. File Count {2}", path, fileName, baseNames.Length);
+
+      var sourceFactory = new WordListFileSourceFactory(baseNames, path, extra, exclusionList);
+      var sources = sourceFactory.GetWordList(true);
+      resolverService = new AnagramResolverService(sources, (w) => new WordGenerator(w));
 
       collection.AddSingleton<IAnagramResolverService, AnagramResolverService>((s) => { return resolverService; });
-      return null;
+      return collection;
     }
 
   }

@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using AnCore;
-using AngramApi.Models;
 using Microsoft.Extensions.Logging;
+using AnCore;
 
-namespace anagramApi.Controllers
+namespace AnagramApi.Controllers
 {
   [ApiVersion("1.0")]
   [Route("api/v{version:apiVersion}/[controller]")]
@@ -36,36 +33,47 @@ namespace anagramApi.Controllers
     [HttpGet("{word}", Name ="Get")]
     public async Task<IActionResult> GetAnagrams(string word, [FromQuery]string language)
     {
-      IEnumerable<string> anagrams;
+      IEnumerable<string> anagrams = null;
       try
       {
-        ValidateParameters(word, language);
-        anagrams = await _resolver.GetAnagramsAsync(word, language);
+        if (ValidParameters(word, language, _logger))
+        {
+          anagrams = await _resolver.GetAnagramsAsync(word, language);
+        }
+        else
+        {
+          anagrams = new string[] {"invalid request" };
+          return new BadRequestObjectResult(anagrams);
+        }
       }
       catch (Exception ex)
       {
-        _logger.LogError(ex, "{0},{1}", word, language);
-        return new BadRequestObjectResult(new string[] { "error", ex.Message });
+        _logger.LogError(ex, "{0},{1} {2}", word, language, ex);
+        return new BadRequestObjectResult(new string[] { "error", ex.Message }); // this can be a concern on information disclosure.
        }
       return Ok(anagrams);
-      //return new string[] { "a1", "a2",word };
     }
 
     #region CustomParameterValidation
-    private void ValidateParameters(string word, string language)
+    private bool ValidParameters(string word, string language, ILogger<AnagramController> logger)
     {
       if (string.IsNullOrWhiteSpace(word) || string.IsNullOrWhiteSpace(language))
       {
-        throw new ArgumentException("null or emtpy strings");
+        //logger.LogWarning("empty word or language");
+        return false;
       }
       if (word.Length > 11)
       {
-        throw new ArgumentException("too long max word length is 11");
+        logger.LogWarning("word too long");
+        //throw new ArgumentException("too long max word length is 11");
+        return false;
       }
       if (string.Compare("en", language, StringComparison.OrdinalIgnoreCase) != 0)
       {
-        throw new ArgumentException("invalid language");
+        logger.LogInformation("{0} language request",language);
+        return false;
       }
+      return true;
     }
     #endregion
   }

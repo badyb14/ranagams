@@ -15,10 +15,19 @@ namespace AnConsole
 
     static void Main(string[] args)
     {
-      var filePath = Directory.GetCurrentDirectory();
-      source1 = WordListFileSourceFactory.GetWordListFromPath("Dictionaries", "words*", null, null)[0];
+      var folder = "Dictionaries";
+      var fileName = "word*";
+      string extra = null;
+      string exclusionList = null;
+
+      var current = Directory.GetCurrentDirectory();
+      var path = Path.Combine(current, folder);
+      var baseNames = Directory.GetFiles(path, fileName);
+      var sourceFactory = new WordListFileSourceFactory(baseNames, path, extra, exclusionList);
+      
+      source1 = sourceFactory.GetWordList(true)[0];
       source1.Load();
-      source2 = WordListFileSourceFactory.GetWordListFromPathV2("Dictionaries", "words*", null, null)[0];
+      source2 = sourceFactory.GetWordList(false)[0];
       source2.Load();
       string word = "trainers"; //silent,elvis,samples,calipers,trainers, salesman, auctioned,mastering, discounted,reductions,percussion
 

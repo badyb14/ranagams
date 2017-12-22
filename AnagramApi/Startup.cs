@@ -17,9 +17,10 @@ namespace AnagramApi
 {
   public class Startup
   {
-    public Startup(IConfiguration configuration)
+    public Startup(IConfiguration configuration, ILoggerFactory loggerFactory)
     {
       Configuration = configuration;
+      AnagramExtensions.LoggerFactory = loggerFactory;
     }
 
     public IConfiguration Configuration { get; }
@@ -43,17 +44,24 @@ namespace AnagramApi
       {
         options.Filters.Add(new RequireHttpsAttribute());
       });
+
+      services.AddAntiforgery();
       services.AddMvc();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     public void Configure(IApplicationBuilder app, IHostingEnvironment env)
     {
+
       if (env.IsDevelopment())
       {
         app.UseDeveloperExceptionPage();
       }
-
+      else
+      {
+        app.UseStatusCodePages("text/plain", "Status code page, status code: {0}");
+      }
+      
       app.UseMvc();
     }
   }

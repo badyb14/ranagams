@@ -9,10 +9,13 @@ namespace AnCore
 {
   /// <summary>
   /// Aggregates all IAnagramResolver in system.
+  /// Has builtin anagram finding using word lists aka default resolvers.
+  /// TODO complete Resolver Management 
   /// </summary>
   public sealed class AnagramResolverService : IAnagramResolverService
   {
     #region Fields
+    private const string SupportedLanguage = "en";
     private readonly Func<string, IWordGenerator> _wordGeneratorFactory;
     //this is thread safe for reading
     private readonly Hashtable _wordListByLanguage = new Hashtable(StringComparer.OrdinalIgnoreCase);
@@ -36,7 +39,7 @@ namespace AnCore
       {
         if (source == null || source.Language == null || string.IsNullOrEmpty(source.Language))
         {
-          continue;
+          throw new ArgumentException("found invalid word list reference", nameof(source));
         }
         _wordListByLanguage.Add(source.Language, source);
       }
@@ -73,11 +76,15 @@ namespace AnCore
     /// <returns></returns>
     public Task<IEnumerable<string>> GetAnagramsAsync(AnagramOptions options)
     {
+      if (options == null)
+      {
+        throw new ArgumentNullException(nameof(options));
+      }
       //find an advanced resolver
       var resolver = FindBestResolver(options);
       if (resolver == null)
       {
-        throw new Exception("Languge is not supported");
+        throw new ArgumentException("Langauge is not supported");
       }
       return resolver.GetAnagramsAsync(options);
     }
@@ -96,6 +103,10 @@ namespace AnCore
 
     public void RemoveResolver(IAnagramResolver resolver)
     {
+      if (resolver == null)
+      {
+        throw new ArgumentNullException(nameof(resolver));
+      }
       lock (_resolverGate)
       {
         _otherResolvers.Remove(resolver);
@@ -104,6 +115,10 @@ namespace AnCore
 
     public void EnableResolver(IAnagramResolver resolver)
     {
+      if (resolver == null)
+      {
+        throw new ArgumentNullException(nameof(resolver));
+      }
       lock (_resolverGate)
       {
         _disabledResolver.Remove(resolver);
@@ -113,6 +128,10 @@ namespace AnCore
 
     public void DisableResolver(IAnagramResolver resolver)
     {
+      if (resolver == null)
+      {
+        throw new ArgumentNullException(nameof(resolver));
+      }
       lock (_resolverGate)
       {
         _otherResolvers.Remove(resolver);
@@ -125,10 +144,11 @@ namespace AnCore
     #region Private methods
     private IEnumerable<string> GetAnagramsInternal(string word, string language)
     {
+      ValidateParameters(word, language);
       var wordList = _wordListByLanguage[language] as IWordList;
-      if (wordList == null)
+      if (wordList == null) // this  looks redundat but is needed; the word list may change; ie disable a language...
       {
-        throw new Exception("Languge is not supported");
+        throw new Exception("Language is not supported");
       }
       var generator = _wordGeneratorFactory(word);
       var result = new List<string>();
@@ -156,11 +176,23 @@ namespace AnCore
       return resolver;
     }
 
-    
-
+    private void ValidateParameters(string word, string language)
+    {
+      if (string.IsNullOrWhiteSpace(word) || string.IsNullOrWhiteSpace(language))
+      {
+        throw new ArgumentException("null or emtpy strings");
+      }
+      if (word.Length > 11)
+      {
+        throw new ArgumentException("too long max word length is 11");
+      }
+      if (string.Compare(SupportedLanguage, language, StringComparison.OrdinalIgnoreCase) != 0)
+      {
+        throw new ArgumentException("invalid language");
+      }
+    }
 
     #endregion
-
 
   }
 }
