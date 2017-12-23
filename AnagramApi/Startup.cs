@@ -45,7 +45,7 @@ namespace AnagramApi
         options.Filters.Add(new RequireHttpsAttribute());
       });
 
-      services.AddAntiforgery();
+      services.AddAntiforgery(); // will only make a difference for post or put API calls
       services.AddMvc();
     }
 

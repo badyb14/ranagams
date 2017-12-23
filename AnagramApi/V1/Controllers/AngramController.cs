@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using AnCore;
+using AnagramApi.Telemetry;
+using System.Diagnostics;
 
 namespace AnagramApi.Controllers
 {
@@ -14,12 +16,15 @@ namespace AnagramApi.Controllers
   {
     private readonly ILogger<AnagramController> _logger;
     private readonly IAnagramResolverService _resolver;
+    private IAnagramResolverMetric _metric;
 
     public AnagramController(IAnagramResolverService resolver,
-      ILogger<AnagramController> logger)
+      ILogger<AnagramController> logger,
+      IAnagramResolverMetric metric)
     {
       _resolver = resolver;
       _logger = logger;
+      _metric = metric;
     }
 
     // GET: api/anagram
@@ -38,7 +43,9 @@ namespace AnagramApi.Controllers
       {
         if (ValidParameters(word, language, _logger))
         {
+          var stopWatch = Stopwatch.StartNew();
           anagrams = await _resolver.GetAnagramsAsync(word, language);
+          TrackTime(stopWatch);
         }
         else
         {
@@ -74,6 +81,12 @@ namespace AnagramApi.Controllers
         return false;
       }
       return true;
+    }
+
+    private void TrackTime(Stopwatch watch)
+    {
+      watch.Stop();
+      _metric.TrackComputeTime(watch.Elapsed);
     }
     #endregion
   }

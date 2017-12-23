@@ -35,7 +35,7 @@ namespace AnCore
         throw new ArgumentException("contains only white space", nameof(word));
       }
 
-      if (word.Length > 11)
+      if (word.Length > MaxWordLength)
       {
         throw new ArgumentOutOfRangeException(nameof(word), "Too long, max accepted word length is 11 char");
       }
@@ -59,21 +59,23 @@ namespace AnCore
 
       var stringLength = _startConfiguration.Length;
       var currentConfig = new char[stringLength];
-      var orderedChars = _startConfiguration.ToCharArray().OrderBy(x => x).ToArray();
+     
       //sort the chars so that currentConfig is alphabetical sorted
+      var orderedChars = _startConfiguration.ToCharArray().OrderBy(x => x).ToArray();
       BuildFirstConfiguration(orderedChars, currentConfig);
 
-      if (IsValidPermutation(currentConfig, _startConfiguration))//make sure we do not loose the first perm
+      if (IsValidPermutation(currentConfig, _startConfiguration))//make sure we do not lose the first perm
       {
         yield return currentConfig;
       }
 
+      
       var prev = currentConfig.Clone() as char[];
       while (PermutationHelper.NextPermutation(currentConfig))
       {
         if (IsValidPermutation(currentConfig, prev, _startConfiguration))
         {
-          prev = currentConfig.Clone() as char[];
+          Array.Copy(currentConfig, prev, stringLength);
           yield return currentConfig; // must be different than previous permutation and different than original string
         }
       }

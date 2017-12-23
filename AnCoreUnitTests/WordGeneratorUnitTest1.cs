@@ -129,8 +129,32 @@ namespace AnCoreUnitTests
       Assert.AreEqual(word.Length, actual.Length, "the length of the permutation must have same lenght as the original word.");
     }
 
+    [TestMethod]
+    [TestCategory("Count Correctness")]
+    [Ignore("It takes too long to run for unit tests")]
+    public void GetPermutations_Count_11LetterWord()
+    {
+      //Arrange
+      var word = "0123456789A";
+      var objectUnderTest = new WordGenerator(word);
+
+      //Act
+      var permutations = objectUnderTest.GetPermutations();
+      char[] actual = null;
+      var indexCount = 0;
+      foreach (var perm in permutations)
+      {
+        actual = perm;
+        indexCount++;
+      }
+
+      //Assert
+      Assert.AreEqual(Util.Factorial(word.Length) - 1, indexCount, "the number of permutations must be equal with Factorial(n)-1");
+      Assert.AreEqual(word.Length, actual.Length, "the length of the permutation must have same lenght as the original word.");
+    }
+
     /// <summary>
-    /// More than 2 times the average of an english word.Takes about 2 minutes.
+    /// More than 2 times the average of an english word.Takes about 1.5 minutes.
     /// </summary>
     [TestMethod]
     [TestCategory("Count Correctness")]

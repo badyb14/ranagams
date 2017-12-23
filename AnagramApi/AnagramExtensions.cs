@@ -1,4 +1,6 @@
-﻿using AnCore;
+﻿using AnagramApi.Telemetry;
+using AnCore;
+using Microsoft.ApplicationInsights;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -42,7 +44,18 @@ namespace AnagramApi
       resolverService = new AnagramResolverService(sources, (w) => new WordGenerator(w));
 
       collection.AddSingleton<IAnagramResolverService, AnagramResolverService>((s) => { return resolverService; });
+
+      EnsureAnagramServiceTelemetry(collection);
+
       return collection;
+    }
+
+    private static void EnsureAnagramServiceTelemetry(IServiceCollection collection)
+    {
+      var telemetryClient = new TelemetryClient();
+      var metricCollection = new AnagramResolverMetricCollection(telemetryClient);
+
+      collection.AddSingleton<IAnagramResolverMetric, AnagramResolverMetricCollection>((s)=> { return metricCollection; });
     }
 
   }

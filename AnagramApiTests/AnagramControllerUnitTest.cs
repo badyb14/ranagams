@@ -1,4 +1,5 @@
 using AnagramApi.Controllers;
+using AnagramApi.Telemetry;
 using AnCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -19,7 +20,8 @@ namespace AnagramApiTests
       //Arrange 
       IAnagramResolverService resolver = null;
       TestLogger logger = new TestLogger();
-      var objectUnderTest = new AnagramController(resolver, logger);
+      IAnagramResolverMetric metric = null;
+      var objectUnderTest = new AnagramController(resolver, logger, metric);
 
       string word = null;
       string language = null;
@@ -39,7 +41,8 @@ namespace AnagramApiTests
       //Arrange 
       IAnagramResolverService resolver = null;
       TestLogger logger = new TestLogger();
-      var objectUnderTest = new AnagramController(resolver, logger);
+      IAnagramResolverMetric metric = null;
+      var objectUnderTest = new AnagramController(resolver, logger, metric);
 
       string word = "";
       string language = null;
@@ -59,7 +62,8 @@ namespace AnagramApiTests
       //Arrange 
       IAnagramResolverService resolver = null;
       TestLogger logger = new TestLogger();
-      var objectUnderTest = new AnagramController(resolver, logger);
+      IAnagramResolverMetric metric = null;
+      var objectUnderTest = new AnagramController(resolver, logger, metric);
 
       string word = "s";
       string language = null;
@@ -79,7 +83,8 @@ namespace AnagramApiTests
       //Arrange 
       IAnagramResolverService resolver = null;
       TestLogger logger = new TestLogger();
-      var objectUnderTest = new AnagramController(resolver, logger);
+      IAnagramResolverMetric metric = null;
+      var objectUnderTest = new AnagramController(resolver, logger, metric);
 
       string word = "0123456789AB";
       string language = "en";
@@ -100,7 +105,8 @@ namespace AnagramApiTests
       //Arrange 
       IAnagramResolverService resolver = null;
       TestLogger logger = new TestLogger();
-      var objectUnderTest = new AnagramController(resolver, logger);
+      IAnagramResolverMetric metric = null;
+      var objectUnderTest = new AnagramController(resolver, logger, metric);
 
       string word = "ab";
       string language = "gr";
@@ -120,7 +126,8 @@ namespace AnagramApiTests
       //Arrange 
       IAnagramResolverService resolver = new TestResolver();
       TestLogger logger = new TestLogger();
-      var objectUnderTest = new AnagramController(resolver, logger);
+      IAnagramResolverMetric metric = null;
+      var objectUnderTest = new AnagramController(resolver, logger, metric);
 
       string word = "ab";
       string language = "en";
